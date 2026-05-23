@@ -1,0 +1,41 @@
+{% extends 'agency/base.html' %}
+{% block title %}Guides{% endblock %}
+{% block nav_guides %}active{% endblock %}
+{% block page_title %}Tour Guides{% endblock %}
+{% block breadcrumb %}Manage your guide team{% endblock %}
+{% block topbar_actions %}<a href="{% url 'guide_create' %}" class="btn btn-primary"><i class="fas fa-user-plus"></i> Add Guide</a>{% endblock %}
+{% block content %}
+{% if guides %}
+<div class="grid-3">
+  {% for g in guides %}
+  <div class="card" style="padding:20px;">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+      <div class="client-avatar" style="width:46px;height:46px;font-size:17px;background:linear-gradient(135deg,var(--teal),#2bb5ac);">{{ g.name|slice:":1" }}</div>
+      <div>
+        <div style="font-family:'Syne',sans-serif;font-size:15px;font-weight:700;">{{ g.name }}</div>
+        <div style="font-size:11px;color:var(--text3);">
+          {% if g.is_available %}<span style="color:var(--green);">● Available</span>{% else %}<span style="color:var(--red);">● Unavailable</span>{% endif %}
+        </div>
+      </div>
+    </div>
+    <div style="font-size:12px;color:var(--text2);margin-bottom:10px;">
+      <div><i class="fas fa-language" style="color:var(--accent);margin-right:6px;width:14px;"></i>{{ g.languages }}</div>
+      {% if g.specialties %}<div style="margin-top:4px;"><i class="fas fa-star" style="color:var(--accent);margin-right:6px;width:14px;"></i>{{ g.specialties }}</div>{% endif %}
+      <div style="margin-top:4px;"><i class="fas fa-envelope" style="color:var(--accent);margin-right:6px;width:14px;"></i>{{ g.email }}</div>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;">
+      <div style="background:var(--bg3);border-radius:6px;padding:4px 10px;font-size:13px;font-weight:700;color:var(--accent);">
+        ⭐ {{ g.rating }}
+      </div>
+      <div style="display:flex;gap:6px;">
+        <a href="{% url 'guide_edit' g.pk %}" class="btn btn-ghost btn-sm"><i class="fas fa-pen"></i></a>
+        <a href="{% url 'guide_delete' g.pk %}" class="btn btn-danger btn-sm" onclick="return confirm('Delete guide?')"><i class="fas fa-trash"></i></a>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="card"><div class="empty-state"><i class="fas fa-user-tie"></i><p>No guides yet. <a href="{% url 'guide_create' %}" style="color:var(--accent);">Add one</a></p></div></div>
+{% endif %}
+{% endblock %}

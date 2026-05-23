@@ -1,0 +1,64 @@
+# Only allow traffic from within the namespace and from Traefik (ingress)
+---
+# Django: only reachable from Nginx pods
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-nginx-to-django
+  namespace: tourismo
+spec:
+  podSelector:
+    matchLabels:
+      app: django
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: nginx
+      ports:
+        - protocol: TCP
+          port: 8000
+---
+# Postgres: only reachable from Django pods
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-django-to-postgres
+  namespace: tourismo
+spec:
+  podSelector:
+    matchLabels:
+      app: postgres
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: django
+      ports:
+        - protocol: TCP
+          port: 5432
+---
+# Nginx: reachable from Traefik (any namespace with traefik label)
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-traefik-to-nginx
+  namespace: tourismo
+spec:
+  podSelector:
+    matchLabels:
+      app: nginx
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: traefik
+      ports:
+        - protocol: TCP
+          port: 80

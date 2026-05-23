@@ -1,0 +1,75 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block title %}Tourismo{% endblock %} - Travel Agency</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="{% static 'css/app.css' %}">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-mark">
+      <div class="logo-icon">✈</div>
+      <div>
+        <div class="logo-text">Tour<span>ismo</span></div>
+      </div>
+    </div>
+    <div class="sidebar-tagline">Agency Management System</div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">Main</div>
+    <a href="{% url 'dashboard' %}" class="nav-link {% block nav_dashboard %}{% endblock %}"><i class="fas fa-chart-pie"></i> Dashboard</a>
+    <a href="{% url 'bookings_list' %}" class="nav-link {% block nav_bookings %}{% endblock %}"><i class="fas fa-ticket-alt"></i> Bookings</a>
+
+    <div class="nav-section-label">Catalog</div>
+    <a href="{% url 'packages_list' %}" class="nav-link {% block nav_packages %}{% endblock %}"><i class="fas fa-suitcase-rolling"></i> Packages</a>
+    <a href="{% url 'destinations_list' %}" class="nav-link {% block nav_destinations %}{% endblock %}"><i class="fas fa-map-marker-alt"></i> Destinations</a>
+
+    <div class="nav-section-label">People</div>
+    <a href="{% url 'clients_list' %}" class="nav-link {% block nav_clients %}{% endblock %}"><i class="fas fa-users"></i> Clients</a>
+    <a href="{% url 'guides_list' %}" class="nav-link {% block nav_guides %}{% endblock %}"><i class="fas fa-user-tie"></i> Guides</a>
+
+    {% if request.user.is_staff %}
+    <div class="nav-section-label">Administration</div>
+    <a href="{% url 'admin_control_dashboard' %}" class="nav-link {% block nav_admin_control %}{% endblock %}"><i class="fas fa-shield-halved"></i> Admin Control</a>
+    {% endif %}
+  </nav>
+  <div class="sidebar-footer">
+    &copy; 2026 Tourismo · v2.0
+  </div>
+</aside>
+
+<main class="main">
+  <div class="topbar">
+    <div class="topbar-left">
+      <button class="btn btn-ghost btn-icon mobile-menu-btn" id="mobile-menu-btn" type="button" aria-label="Toggle navigation">
+        <i class="fas fa-bars"></i>
+      </button>
+      <div>
+        <div class="topbar-title">{% block page_title %}Dashboard{% endblock %}</div>
+        <div class="topbar-breadcrumb">{% block breadcrumb %}Overview{% endblock %}</div>
+      </div>
+    </div>
+    <div class="topbar-actions">
+      <button class="btn btn-ghost btn-icon" id="theme-toggle" type="button" aria-label="Toggle dark mode" title="Toggle dark mode">
+        <i class="fas fa-moon"></i>
+      </button>
+      {% block topbar_actions %}{% endblock %}
+    </div>
+  </div>
+  <div class="content">
+    {% block content %}{% endblock %}
+  </div>
+</main>
+
+<script src="{% static 'js/app.js' %}"></script>
+{% block extra_scripts %}{% endblock %}
+</body>
+</html>

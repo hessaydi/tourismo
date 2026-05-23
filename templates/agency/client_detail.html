@@ -1,0 +1,73 @@
+{% extends 'agency/base.html' %}
+{% block title %}{{ client.full_name }}{% endblock %}
+{% block nav_clients %}active{% endblock %}
+{% block page_title %}{{ client.full_name }}{% endblock %}
+{% block breadcrumb %}<a href="{% url 'clients_list' %}" style="color:var(--text2);text-decoration:none;">Clients</a> → Profile{% endblock %}
+{% block topbar_actions %}
+<a href="{% url 'client_edit' client.pk %}" class="btn btn-ghost"><i class="fas fa-pen"></i> Edit</a>
+<a href="{% url 'booking_create' %}" class="btn btn-primary"><i class="fas fa-plus"></i> New Booking</a>
+{% endblock %}
+{% block content %}
+<div class="grid-2">
+  <div class="card">
+    <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px;">
+      <div class="client-avatar" style="width:56px;height:56px;font-size:20px;">{{ client.first_name.0 }}{{ client.last_name.0 }}</div>
+      <div>
+        <div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:700;">{{ client.full_name }}</div>
+        <div style="color:var(--text3);font-size:13px;">Client since {{ client.created_at|date:"M Y" }}</div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:12px;">
+      <div style="display:flex;gap:12px;align-items:center;">
+        <div style="width:32px;height:32px;border-radius:8px;background:var(--bg3);display:flex;align-items:center;justify-content:center;color:var(--accent);font-size:13px;"><i class="fas fa-envelope"></i></div>
+        <div><div style="font-size:11px;color:var(--text3);">EMAIL</div><div style="font-size:13px;">{{ client.email }}</div></div>
+      </div>
+      <div style="display:flex;gap:12px;align-items:center;">
+        <div style="width:32px;height:32px;border-radius:8px;background:var(--bg3);display:flex;align-items:center;justify-content:center;color:var(--accent);font-size:13px;"><i class="fas fa-phone"></i></div>
+        <div><div style="font-size:11px;color:var(--text3);">PHONE</div><div style="font-size:13px;">{{ client.phone }}</div></div>
+      </div>
+      {% if client.nationality %}
+      <div style="display:flex;gap:12px;align-items:center;">
+        <div style="width:32px;height:32px;border-radius:8px;background:var(--bg3);display:flex;align-items:center;justify-content:center;color:var(--accent);font-size:13px;"><i class="fas fa-globe"></i></div>
+        <div><div style="font-size:11px;color:var(--text3);">NATIONALITY</div><div style="font-size:13px;">{{ client.nationality }}</div></div>
+      </div>
+      {% endif %}
+      {% if client.passport_number %}
+      <div style="display:flex;gap:12px;align-items:center;">
+        <div style="width:32px;height:32px;border-radius:8px;background:var(--bg3);display:flex;align-items:center;justify-content:center;color:var(--accent);font-size:13px;"><i class="fas fa-id-card"></i></div>
+        <div><div style="font-size:11px;color:var(--text3);">PASSPORT</div><div style="font-size:13px;">{{ client.passport_number }}</div></div>
+      </div>
+      {% endif %}
+    </div>
+    {% if client.notes %}
+    <div style="margin-top:20px;padding:14px;background:var(--bg3);border-radius:var(--radius-sm);">
+      <div style="font-size:11px;color:var(--text3);margin-bottom:6px;">NOTES</div>
+      <div style="font-size:13px;color:var(--text2);">{{ client.notes }}</div>
+    </div>
+    {% endif %}
+  </div>
+  <div class="card">
+    <div class="card-header"><span class="card-title">Booking History</span></div>
+    {% if bookings %}
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      {% for b in bookings %}
+      <div style="background:var(--bg3);border-radius:var(--radius-sm);padding:14px;border:1px solid var(--border);">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+          <div style="font-family:'Syne',sans-serif;font-size:13px;font-weight:700;">{{ b.booking_ref }}</div>
+          <span class="badge badge-{{ b.status }}">{{ b.get_status_display }}</span>
+        </div>
+        <div style="font-size:13px;font-weight:500;margin-bottom:4px;">{{ b.package.title }}</div>
+        <div style="font-size:11px;color:var(--text3);">{{ b.travel_date }} → {{ b.return_date }} · {{ b.num_travelers }} traveler(s)</div>
+        <div style="display:flex;justify-content:space-between;margin-top:8px;">
+          <span style="font-size:13px;font-weight:700;color:var(--accent);">${{ b.total_price }}</span>
+          <span class="badge badge-{{ b.payment_status }}">{{ b.get_payment_status_display }}</span>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state"><i class="fas fa-ticket-alt"></i><p>No bookings yet</p></div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

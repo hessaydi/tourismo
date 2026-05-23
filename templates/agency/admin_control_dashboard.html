@@ -1,0 +1,130 @@
+{% extends 'agency/base.html' %}
+{% block title %}Admin Control{% endblock %}
+{% block nav_admin_control %}active{% endblock %}
+{% block page_title %}Admin Control Dashboard{% endblock %}
+{% block breadcrumb %}Staff-only operations and data governance{% endblock %}
+
+{% block topbar_actions %}
+<a href="{% url 'admin:index' %}" class="btn btn-primary"><i class="fas fa-lock"></i> Django Admin</a>
+{% endblock %}
+
+{% block content %}
+<div class="stats-grid">
+  <div class="stat-card orange">
+    <div class="stat-icon orange"><i class="fas fa-clock"></i></div>
+    <div class="stat-value">{{ pending_bookings }}</div>
+    <div class="stat-label">Pending Bookings</div>
+  </div>
+  <div class="stat-card purple">
+    <div class="stat-icon purple"><i class="fas fa-wallet"></i></div>
+    <div class="stat-value">{{ unpaid_bookings }}</div>
+    <div class="stat-label">Unpaid Bookings</div>
+  </div>
+  <div class="stat-card green">
+    <div class="stat-icon green"><i class="fas fa-calendar-check"></i></div>
+    <div class="stat-value">{{ upcoming_confirmed }}</div>
+    <div class="stat-label">Upcoming Confirmed Trips</div>
+  </div>
+  <div class="stat-card blue">
+    <div class="stat-icon blue"><i class="fas fa-dollar-sign"></i></div>
+    <div class="stat-value">${{ paid_revenue|floatformat:0 }}</div>
+    <div class="stat-label">Collected Revenue</div>
+  </div>
+</div>
+
+<div class="grid-2" style="margin-bottom:20px;">
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">System Controls</span>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+      <a class="btn btn-ghost" href="{% url 'admin:agency_booking_changelist' %}"><i class="fas fa-ticket-alt"></i> Bookings Admin</a>
+      <a class="btn btn-ghost" href="{% url 'admin:agency_client_changelist' %}"><i class="fas fa-users"></i> Clients Admin</a>
+      <a class="btn btn-ghost" href="{% url 'admin:agency_package_changelist' %}"><i class="fas fa-suitcase-rolling"></i> Packages Admin</a>
+      <a class="btn btn-ghost" href="{% url 'admin:agency_destination_changelist' %}"><i class="fas fa-globe"></i> Destinations Admin</a>
+      <a class="btn btn-ghost" href="{% url 'admin:agency_guide_changelist' %}"><i class="fas fa-user-tie"></i> Guides Admin</a>
+      <a class="btn btn-ghost" href="{% url 'admin:auth_user_changelist' %}"><i class="fas fa-user-shield"></i> User Access</a>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">Operations Snapshot</span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:12px;">
+      <div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--border);padding-bottom:10px;">
+        <span style="color:var(--text2);">Active Packages</span>
+        <strong>{{ active_packages }}</strong>
+      </div>
+      <div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--border);padding-bottom:10px;">
+        <span style="color:var(--text2);">Inactive Packages</span>
+        <strong>{{ inactive_packages }}</strong>
+      </div>
+      <div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--border);padding-bottom:10px;">
+        <span style="color:var(--text2);">Featured Destinations</span>
+        <strong>{{ featured_destinations }}</strong>
+      </div>
+      <div style="display:flex;justify-content:space-between;">
+        <span style="color:var(--text2);">Unavailable Guides</span>
+        <strong>{{ unavailable_guides }}</strong>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="grid-2">
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">Recent Bookings</span>
+    </div>
+    {% if recent_bookings %}
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Ref</th>
+            <th>Client</th>
+            <th>Status</th>
+            <th>Payment</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for b in recent_bookings %}
+          <tr>
+            <td style="font-weight:700;color:var(--text);">{{ b.booking_ref }}</td>
+            <td>{{ b.client.full_name }}</td>
+            <td><span class="badge badge-{{ b.status }}">{{ b.get_status_display }}</span></td>
+            <td><span class="badge badge-{{ b.payment_status }}">{{ b.get_payment_status_display }}</span></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="empty-state"><i class="fas fa-ticket-alt"></i><p>No booking activity yet</p></div>
+    {% endif %}
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">Recent Clients</span>
+    </div>
+    {% if recent_clients %}
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      {% for c in recent_clients %}
+      <div style="display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border);padding-bottom:8px;">
+        <div class="client-avatar" style="width:30px;height:30px;font-size:11px;">{{ c.first_name.0 }}{{ c.last_name.0 }}</div>
+        <div style="flex:1;">
+          <div style="font-weight:600;">{{ c.full_name }}</div>
+          <div style="font-size:12px;color:var(--text3);">{{ c.email }}</div>
+        </div>
+        <span style="font-size:12px;color:var(--text3);">{{ c.created_at|date:"M d" }}</span>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state"><i class="fas fa-users"></i><p>No client activity yet</p></div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

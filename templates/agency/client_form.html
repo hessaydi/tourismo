@@ -1,0 +1,56 @@
+{% extends 'agency/base.html' %}
+{% block title %}{% if client %}Edit Client{% else %}New Client{% endif %}{% endblock %}
+{% block nav_clients %}active{% endblock %}
+{% block page_title %}{% if client %}Edit Client{% else %}New Client{% endif %}{% endblock %}
+{% block breadcrumb %}<a href="{% url 'clients_list' %}" style="color:var(--text2);text-decoration:none;">Clients</a> → {% if client %}{{ client.full_name }}{% else %}Create{% endif %}{% endblock %}
+{% block topbar_actions %}<a href="{% url 'clients_list' %}" class="btn btn-ghost"><i class="fas fa-arrow-left"></i> Back</a>{% endblock %}
+{% block content %}
+<div class="card" style="max-width:780px;">
+  <div class="card-header"><span class="card-title">Client Information</span></div>
+  <form method="post">
+    {% csrf_token %}
+    <div class="form-grid">
+      <div class="form-group">
+        <label>FIRST NAME</label>
+        <input type="text" name="first_name" value="{{ client.first_name|default:'' }}" required placeholder="John">
+      </div>
+      <div class="form-group">
+        <label>LAST NAME</label>
+        <input type="text" name="last_name" value="{{ client.last_name|default:'' }}" required placeholder="Smith">
+      </div>
+      <div class="form-group">
+        <label>EMAIL</label>
+        <input type="email" name="email" value="{{ client.email|default:'' }}" required placeholder="john@email.com">
+      </div>
+      <div class="form-group">
+        <label>PHONE</label>
+        <input type="text" name="phone" value="{{ client.phone|default:'' }}" required placeholder="+1 555 000 0000">
+      </div>
+      <div class="form-group">
+        <label>PASSPORT NUMBER</label>
+        <input type="text" name="passport_number" value="{{ client.passport_number|default:'' }}" placeholder="AB1234567">
+      </div>
+      <div class="form-group">
+        <label>NATIONALITY</label>
+        <input type="text" name="nationality" value="{{ client.nationality|default:'' }}" placeholder="e.g. American">
+      </div>
+      <div class="form-group">
+        <label>DATE OF BIRTH</label>
+        <input type="date" name="date_of_birth" value="{{ client.date_of_birth|default:'' }}">
+      </div>
+      <div class="form-group full">
+        <label>ADDRESS</label>
+        <textarea name="address" placeholder="Full address...">{{ client.address|default:'' }}</textarea>
+      </div>
+      <div class="form-group full">
+        <label>NOTES</label>
+        <textarea name="notes" placeholder="Any special notes or preferences...">{{ client.notes|default:'' }}</textarea>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:24px;">
+      <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> {% if client %}Save Changes{% else %}Add Client{% endif %}</button>
+      <a href="{% url 'clients_list' %}" class="btn btn-ghost">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

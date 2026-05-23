@@ -1,0 +1,50 @@
+# Traefik IngressRoute for tourismo.clcdream.com
+# Requires Traefik v2/v3 CRDs installed in the cluster.
+# Install Traefik: https://doc.traefik.io/traefik/getting-started/install-traefik/
+#
+# For TLS: ensure cert-manager is installed and a ClusterIssuer named
+# "letsencrypt-prod" exists, or adjust the tls section accordingly.
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: tourismo-https
+  namespace: tourismo
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`tourismo.clcdream.com`)
+      kind: Rule
+      services:
+        - name: nginx-service
+          port: 80
+  tls:
+    certResolver: letsencrypt
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: tourismo-http-redirect
+  namespace: tourismo
+spec:
+  entryPoints:
+    - web
+  routes:
+    - match: Host(`tourismo.clcdream.com`)
+      kind: Rule
+      middlewares:
+        - name: redirect-https
+      services:
+        - name: nginx-service
+          port: 80
+---
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: redirect-https
+  namespace: tourismo
+spec:
+  redirectScheme:
+    scheme: https
+    permanent: true

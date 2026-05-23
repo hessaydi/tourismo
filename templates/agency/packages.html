@@ -1,0 +1,58 @@
+{% extends 'agency/base.html' %}
+{% block title %}Packages{% endblock %}
+{% block nav_packages %}active{% endblock %}
+{% block page_title %}Packages{% endblock %}
+{% block breadcrumb %}Manage travel packages{% endblock %}
+{% block topbar_actions %}
+<a href="{% url 'package_create' %}" class="btn btn-primary"><i class="fas fa-plus"></i> New Package</a>
+{% endblock %}
+{% block content %}
+<div class="search-bar">
+  <form method="get" style="display:flex;gap:10px;flex-wrap:wrap;width:100%;">
+    <div class="search-input-wrap">
+      <i class="fas fa-search"></i>
+      <input type="text" name="q" placeholder="Search packages..." value="{{ q }}">
+    </div>
+    <select name="category" style="width:180px;">
+      <option value="">All Categories</option>
+      {% for val, label in categories %}
+      <option value="{{ val }}" {% if cat == val %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+    <button type="submit" class="btn btn-ghost"><i class="fas fa-filter"></i> Filter</button>
+    {% if q or cat %}<a href="{% url 'packages_list' %}" class="btn btn-ghost">Clear</a>{% endif %}
+  </form>
+</div>
+
+{% if packages %}
+<div class="package-grid">
+  {% for pkg in packages %}
+  <div class="pkg-card">
+    <div class="pkg-img" {% if pkg.image_url %}style="background-image:url('{{ pkg.image_url }}')"{% endif %}>
+      {% if not pkg.image_url %}✈{% endif %}
+      <span class="pkg-cat-badge">{{ pkg.get_category_display }}</span>
+    </div>
+    <div class="pkg-body">
+      <div class="pkg-title">{{ pkg.title }}</div>
+      <div class="pkg-dest"><i class="fas fa-map-marker-alt" style="color:var(--accent);margin-right:4px;"></i>{{ pkg.destination }}</div>
+      <div class="pkg-meta">
+        <div class="pkg-meta-item"><i class="fas fa-clock"></i>{{ pkg.duration_days }} days</div>
+        <div class="pkg-meta-item"><i class="fas fa-ticket-alt"></i>{{ pkg.b_count }} bookings</div>
+        <div class="pkg-meta-item"><i class="fas fa-users"></i>Max {{ pkg.max_capacity }}</div>
+      </div>
+      <span class="badge badge-{{ pkg.status }}">{{ pkg.get_status_display }}</span>
+    </div>
+    <div class="pkg-footer">
+      <div class="pkg-price">${{ pkg.price_per_person }} <span>/person</span></div>
+      <div style="display:flex;gap:6px;">
+        <a href="{% url 'package_edit' pkg.pk %}" class="btn btn-ghost btn-sm"><i class="fas fa-pen"></i></a>
+        <a href="{% url 'package_delete' pkg.pk %}" class="btn btn-danger btn-sm" onclick="return confirm('Delete this package?')"><i class="fas fa-trash"></i></a>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="card"><div class="empty-state"><i class="fas fa-suitcase-rolling"></i><p>No packages found. <a href="{% url 'package_create' %}" style="color:var(--accent);">Add one</a></p></div></div>
+{% endif %}
+{% endblock %}

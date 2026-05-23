@@ -1,0 +1,54 @@
+{% extends 'agency/base.html' %}
+{% block title %}{% if guide %}Edit Guide{% else %}New Guide{% endif %}{% endblock %}
+{% block nav_guides %}active{% endblock %}
+{% block page_title %}{% if guide %}Edit Guide{% else %}New Guide{% endif %}{% endblock %}
+{% block breadcrumb %}<a href="{% url 'guides_list' %}" style="color:var(--text2);text-decoration:none;">Guides</a> → {% if guide %}{{ guide.name }}{% else %}Create{% endif %}{% endblock %}
+{% block topbar_actions %}<a href="{% url 'guides_list' %}" class="btn btn-ghost"><i class="fas fa-arrow-left"></i> Back</a>{% endblock %}
+{% block content %}
+<div class="card" style="max-width:620px;">
+  <div class="card-header"><span class="card-title">Guide Information</span></div>
+  <form method="post">
+    {% csrf_token %}
+    <div class="form-grid">
+      <div class="form-group full">
+        <label>FULL NAME</label>
+        <input type="text" name="name" value="{{ guide.name|default:'' }}" required placeholder="e.g. Youssef El Amrani">
+      </div>
+      <div class="form-group">
+        <label>EMAIL</label>
+        <input type="email" name="email" value="{{ guide.email|default:'' }}" required placeholder="guide@email.com">
+      </div>
+      <div class="form-group">
+        <label>PHONE</label>
+        <input type="text" name="phone" value="{{ guide.phone|default:'' }}" required placeholder="+212 600 000 000">
+      </div>
+      <div class="form-group full">
+        <label>LANGUAGES (comma-separated)</label>
+        <input type="text" name="languages" value="{{ guide.languages|default:'' }}" required placeholder="e.g. Arabic, French, English, Spanish">
+      </div>
+      <div class="form-group">
+        <label>SPECIALTIES</label>
+        <input type="text" name="specialties" value="{{ guide.specialties|default:'' }}" placeholder="e.g. Desert tours, Cultural tours">
+      </div>
+      <div class="form-group">
+        <label>RATING (0–5)</label>
+        <input type="number" name="rating" value="{{ guide.rating|default:5.0 }}" min="0" max="5" step="0.1">
+      </div>
+      <div class="form-group full">
+        <label>BIO</label>
+        <textarea name="bio" placeholder="Short guide biography...">{{ guide.bio|default:'' }}</textarea>
+      </div>
+      <div class="form-group full">
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+          <input type="checkbox" name="is_available" {% if not guide or guide.is_available %}checked{% endif %} style="width:auto;padding:0;">
+          Currently Available
+        </label>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:24px;">
+      <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> {% if guide %}Save Changes{% else %}Add Guide{% endif %}</button>
+      <a href="{% url 'guides_list' %}" class="btn btn-ghost">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

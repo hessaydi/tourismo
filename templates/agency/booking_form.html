@@ -1,0 +1,85 @@
+{% extends 'agency/base.html' %}
+{% block title %}{% if booking %}Edit Booking{% else %}New Booking{% endif %}{% endblock %}
+{% block nav_bookings %}active{% endblock %}
+{% block page_title %}{% if booking %}Edit Booking{% else %}New Booking{% endif %}{% endblock %}
+{% block breadcrumb %}<a href="{% url 'bookings_list' %}" style="color:var(--text2);text-decoration:none;">Bookings</a> → {% if booking %}{{ booking.booking_ref }}{% else %}Create{% endif %}{% endblock %}
+{% block topbar_actions %}<a href="{% url 'bookings_list' %}" class="btn btn-ghost"><i class="fas fa-arrow-left"></i> Back</a>{% endblock %}
+{% block content %}
+<div class="card" style="max-width:780px;">
+  <div class="card-header"><span class="card-title">Booking Details</span></div>
+  <form method="post">
+    {% csrf_token %}
+    <div class="form-grid">
+      <div class="form-group">
+        <label>CLIENT</label>
+        <select name="client" required>
+          <option value="">Select client</option>
+          {% for c in clients %}
+          <option value="{{ c.pk }}" {% if booking and booking.client_id == c.pk %}selected{% endif %}>{{ c.full_name }} — {{ c.email }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-group">
+        <label>PACKAGE</label>
+        <select name="package" required id="pkg-select">
+          <option value="">Select package</option>
+          {% for p in packages %}
+          <option value="{{ p.pk }}" data-price="{{ p.price_per_person }}" {% if booking and booking.package_id == p.pk %}selected{% endif %}>{{ p.title }} — ${{ p.price_per_person }}/person</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-group">
+        <label>TRAVEL DATE</label>
+        <input type="date" name="travel_date" value="{{ booking.travel_date|default:'' }}" required>
+      </div>
+      <div class="form-group">
+        <label>RETURN DATE</label>
+        <input type="date" name="return_date" value="{{ booking.return_date|default:'' }}" required>
+      </div>
+      <div class="form-group">
+        <label>NUMBER OF TRAVELERS</label>
+        <input type="number" name="num_travelers" id="num-travelers" value="{{ booking.num_travelers|default:1 }}" min="1" required>
+      </div>
+      <div class="form-group">
+        <label>TOTAL PRICE ($)</label>
+        <input type="number" name="total_price" id="total-price" value="{{ booking.total_price|default:'' }}" step="0.01" required placeholder="Auto-calculated">
+      </div>
+      <div class="form-group">
+        <label>BOOKING STATUS</label>
+        <select name="status">
+          {% for val, label in statuses %}
+          <option value="{{ val }}" {% if booking and booking.status == val %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-group">
+        <label>PAYMENT STATUS</label>
+        <select name="payment_status">
+          {% for val, label in payment_statuses %}
+          <option value="{{ val }}" {% if booking and booking.payment_status == val %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-group full">
+        <label>SPECIAL REQUESTS</label>
+        <textarea name="special_requests" placeholder="Dietary restrictions, accessibility needs, room preferences...">{{ booking.special_requests|default:'' }}</textarea>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:24px;">
+      <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> {% if booking %}Save Changes{% else %}Create Booking{% endif %}</button>
+      <a href="{% url 'bookings_list' %}" class="btn btn-ghost">Cancel</a>
+    </div>
+  </form>
+</div>
+<script>
+function calcTotal() {
+  const sel = document.getElementById('pkg-select');
+  const opt = sel.options[sel.selectedIndex];
+  const price = parseFloat(opt?.dataset?.price || 0);
+  const num = parseInt(document.getElementById('num-travelers').value || 1);
+  if (price) document.getElementById('total-price').value = (price * num).toFixed(2);
+}
+document.getElementById('pkg-select').addEventListener('change', calcTotal);
+document.getElementById('num-travelers').addEventListener('input', calcTotal);
+</script>
+{% endblock %}
