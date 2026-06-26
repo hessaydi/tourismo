@@ -1,0 +1,22 @@
+{% extends 'agency/base.html' %}
+{% block title %}{{ profile_user.username }}{% endblock %}
+{% block nav_users %}active{% endblock %}
+{% block page_title %}User Profile{% endblock %}
+{% block breadcrumb %}<a href="{% url 'users_list' %}" style="color:var(--text2);text-decoration:none;">Users</a> → {{ profile_user.username }}{% endblock %}
+{% block topbar_actions %}
+{% if can_modify_profile_user %}
+<a href="{% url 'user_edit' profile_user.pk %}" class="btn btn-ghost"><i class="fas fa-pen"></i> Edit</a>
+{% endif %}
+{% endblock %}
+{% block content %}
+<div class="card" style="max-width:720px;">
+  <div style="display:grid;grid-template-columns:180px 1fr;row-gap:12px;column-gap:14px;font-size:14px;">
+    <div style="color:var(--text3);">Username</div><div>{{ profile_user.username }}</div>
+    <div style="color:var(--text3);">Role</div><div>{{ profile_role|title }}</div>
+    <div style="color:var(--text3);">First name</div><div>{{ profile_user.first_name|default:"—" }}</div>
+    <div style="color:var(--text3);">Last name</div><div>{{ profile_user.last_name|default:"—" }}</div>
+    <div style="color:var(--text3);">Email</div><div>{{ profile_user.email|default:"—" }}</div>
+    <div style="color:var(--text3);">Status</div><div>{% if profile_user.is_active %}Active{% else %}Inactive{% endif %}</div>
+  </div>
+</div>
+{% endblock %}

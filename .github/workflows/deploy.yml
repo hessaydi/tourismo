@@ -31,11 +31,18 @@ jobs:
       - name: Lint with ruff
         run: uv run ruff check .
 
-      - name: Run tests
+      - name: Run tests with coverage
         env:
           DJANGO_SECRET_KEY: ci-secret-key
           DEBUG: "True"
-        run: uv run python manage.py test
+        run: uv run pytest --cov=agency --cov-report=term-missing --cov-report=html --cov-fail-under=80
+
+      - name: Upload coverage HTML report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-html-report
+          path: htmlcov/
 
   # ── Build & Push Docker image ───────────────────────────────────────────────
   build:

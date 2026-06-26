@@ -3,7 +3,7 @@
 {% block nav_guides %}active{% endblock %}
 {% block page_title %}Tour Guides{% endblock %}
 {% block breadcrumb %}Manage your guide team{% endblock %}
-{% block topbar_actions %}<a href="{% url 'guide_create' %}" class="btn btn-primary"><i class="fas fa-user-plus"></i> Add Guide</a>{% endblock %}
+{% block topbar_actions %}{% if can_manage_data %}<a href="{% url 'guide_create' %}" class="btn btn-primary"><i class="fas fa-user-plus"></i> Add Guide</a>{% endif %}{% endblock %}
 {% block content %}
 {% if guides %}
 <div class="grid-3">
@@ -27,15 +27,17 @@
       <div style="background:var(--bg3);border-radius:6px;padding:4px 10px;font-size:13px;font-weight:700;color:var(--accent);">
         ⭐ {{ g.rating }}
       </div>
+      {% if can_manage_data %}
       <div style="display:flex;gap:6px;">
         <a href="{% url 'guide_edit' g.pk %}" class="btn btn-ghost btn-sm"><i class="fas fa-pen"></i></a>
         <a href="{% url 'guide_delete' g.pk %}" class="btn btn-danger btn-sm" onclick="return confirm('Delete guide?')"><i class="fas fa-trash"></i></a>
       </div>
+      {% endif %}
     </div>
   </div>
   {% endfor %}
 </div>
 {% else %}
-<div class="card"><div class="empty-state"><i class="fas fa-user-tie"></i><p>No guides yet. <a href="{% url 'guide_create' %}" style="color:var(--accent);">Add one</a></p></div></div>
+<div class="card"><div class="empty-state"><i class="fas fa-user-tie"></i><p>No guides yet.{% if can_manage_data %} <a href="{% url 'guide_create' %}" style="color:var(--accent);">Add one</a>{% endif %}</p></div></div>
 {% endif %}
 {% endblock %}

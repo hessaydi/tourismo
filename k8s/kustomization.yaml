@@ -4,29 +4,29 @@ kind: Kustomization
 namespace: tourismo
 
 resources:
-  # Foundation
-  - namespace.yaml
-  - secret.yaml
-  - configmap.yaml
-  - media-pvc.yaml
-  - poddisruptionbudget.yaml
-  - networkpolicy.yaml
+# Foundation
+- namespace.yaml
+- secret.yaml
+- configmap.yaml
+- media-pvc.yaml
+- poddisruptionbudget.yaml
+- networkpolicy.yaml
 
-  # PostgreSQL
-  - postgres/pvc.yaml
-  - postgres/deployment.yaml
-  - postgres/service.yaml
+# PostgreSQL
+- postgres/pvc.yaml
+- postgres/deployment.yaml
+- postgres/service.yaml
 
-  # Django
-  - django/deployment.yaml
-  - django/service.yaml
-  - django/hpa.yaml
+# Django
+- django/deployment.yaml
+- django/service.yaml
+- django/hpa.yaml
 
-  # Nginx
-  - nginx/configmap.yaml
-  - nginx/deployment.yaml
-  - nginx/service.yaml
-  - nginx/hpa.yaml
+# Nginx
+- nginx/configmap.yaml
+- nginx/deployment.yaml
+- nginx/service.yaml
+- nginx/hpa.yaml
 
-  # Traefik routing
-  - traefik/ingressroute.yaml
+# Traefik routing
+- traefik/ingressroute.yaml

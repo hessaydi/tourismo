@@ -4,7 +4,9 @@
 {% block page_title %}Packages{% endblock %}
 {% block breadcrumb %}Manage travel packages{% endblock %}
 {% block topbar_actions %}
+{% if can_manage_data %}
 <a href="{% url 'package_create' %}" class="btn btn-primary"><i class="fas fa-plus"></i> New Package</a>
+{% endif %}
 {% endblock %}
 {% block content %}
 <div class="search-bar">
@@ -44,15 +46,17 @@
     </div>
     <div class="pkg-footer">
       <div class="pkg-price">${{ pkg.price_per_person }} <span>/person</span></div>
+      {% if can_manage_data %}
       <div style="display:flex;gap:6px;">
         <a href="{% url 'package_edit' pkg.pk %}" class="btn btn-ghost btn-sm"><i class="fas fa-pen"></i></a>
         <a href="{% url 'package_delete' pkg.pk %}" class="btn btn-danger btn-sm" onclick="return confirm('Delete this package?')"><i class="fas fa-trash"></i></a>
       </div>
+      {% endif %}
     </div>
   </div>
   {% endfor %}
 </div>
 {% else %}
-<div class="card"><div class="empty-state"><i class="fas fa-suitcase-rolling"></i><p>No packages found. <a href="{% url 'package_create' %}" style="color:var(--accent);">Add one</a></p></div></div>
+<div class="card"><div class="empty-state"><i class="fas fa-suitcase-rolling"></i><p>No packages found.{% if can_manage_data %} <a href="{% url 'package_create' %}" style="color:var(--accent);">Add one</a>{% endif %}</p></div></div>
 {% endif %}
 {% endblock %}

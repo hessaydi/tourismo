@@ -1,0 +1,48 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Logged Out - Tourismo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/app.css' %}">
+</head>
+<body class="auth-page">
+  <main class="auth-container">
+    <section class="card auth-card">
+      <h1 class="auth-title">Tourismo</h1>
+      <p class="auth-subtitle">You logged out. Choose a saved profile to sign in quickly.</p>
+
+      {% if recent_profiles %}
+      <div class="flash-stack" style="margin-bottom:16px;">
+        {% for profile in recent_profiles %}
+        <form method="post" action="{% url 'saved_profile_login' %}">
+          {% csrf_token %}
+          <input type="hidden" name="token" value="{{ profile.token }}">
+          <div style="display:flex;gap:8px;">
+            <button type="submit" class="btn btn-ghost" style="justify-content:flex-start;flex:1;">
+              Continue as {{ profile.display_name }} (@{{ profile.username }})
+            </button>
+            <a href="{% url 'login' %}?username={{ profile.username }}" class="btn btn-ghost">Use password</a>
+          </div>
+        </form>
+        {% endfor %}
+      </div>
+      <form method="post" action="{% url 'clear_saved_profiles' %}" style="margin-bottom:16px;">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Clear saved profiles</button>
+      </form>
+      {% endif %}
+
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <a href="{% url 'login' %}" class="btn btn-primary">Login with another account</a>
+        <a href="{% url 'register' %}" class="btn btn-ghost">Create account</a>
+      </div>
+    </section>
+  </main>
+  <script src="{% static 'js/app.js' %}"></script>
+</body>
+</html>

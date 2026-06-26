@@ -11,15 +11,15 @@ spec:
     matchLabels:
       app: django
   policyTypes:
-    - Ingress
+  - Ingress
   ingress:
-    - from:
-        - podSelector:
-            matchLabels:
-              app: nginx
-      ports:
-        - protocol: TCP
-          port: 8000
+  - from:
+    - podSelector:
+        matchLabels:
+          app: nginx
+    ports:
+    - protocol: TCP
+      port: 8000
 ---
 # Postgres: only reachable from Django pods
 apiVersion: networking.k8s.io/v1
@@ -32,15 +32,15 @@ spec:
     matchLabels:
       app: postgres
   policyTypes:
-    - Ingress
+  - Ingress
   ingress:
-    - from:
-        - podSelector:
-            matchLabels:
-              app: django
-      ports:
-        - protocol: TCP
-          port: 5432
+  - from:
+    - podSelector:
+        matchLabels:
+          app: django
+    ports:
+    - protocol: TCP
+      port: 5432
 ---
 # Nginx: reachable from Traefik (any namespace with traefik label)
 apiVersion: networking.k8s.io/v1
@@ -53,12 +53,12 @@ spec:
     matchLabels:
       app: nginx
   policyTypes:
-    - Ingress
+  - Ingress
   ingress:
-    - from:
-        - namespaceSelector:
-            matchLabels:
-              kubernetes.io/metadata.name: traefik
-      ports:
-        - protocol: TCP
-          port: 80
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: traefik
+    ports:
+    - protocol: TCP
+      port: 80

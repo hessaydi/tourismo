@@ -4,7 +4,9 @@
 {% block page_title %}Clients{% endblock %}
 {% block breadcrumb %}Manage client database{% endblock %}
 {% block topbar_actions %}
+{% if can_manage_data %}
 <a href="{% url 'client_create' %}" class="btn btn-primary"><i class="fas fa-user-plus"></i> Add Client</a>
+{% endif %}
 {% endblock %}
 {% block content %}
 <div class="search-bar">
@@ -48,8 +50,10 @@
           <td>
             <div style="display:flex;gap:6px;">
               <a href="{% url 'client_detail' c.pk %}" class="btn btn-ghost btn-sm"><i class="fas fa-eye"></i></a>
+              {% if can_manage_data %}
               <a href="{% url 'client_edit' c.pk %}" class="btn btn-ghost btn-sm"><i class="fas fa-pen"></i></a>
               <a href="{% url 'client_delete' c.pk %}" class="btn btn-danger btn-sm" onclick="return confirm('Delete client?')"><i class="fas fa-trash"></i></a>
+              {% endif %}
             </div>
           </td>
         </tr>
@@ -58,7 +62,7 @@
     </table>
   </div>
   {% else %}
-  <div class="empty-state"><i class="fas fa-users"></i><p>No clients yet. <a href="{% url 'client_create' %}" style="color:var(--accent);">Add one</a></p></div>
+  <div class="empty-state"><i class="fas fa-users"></i><p>No clients yet.{% if can_manage_data %} <a href="{% url 'client_create' %}" style="color:var(--accent);">Add one</a>{% endif %}</p></div>
   {% endif %}
 </div>
 {% endblock %}

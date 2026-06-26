@@ -35,8 +35,11 @@
     <div class="nav-section-label">People</div>
     <a href="{% url 'clients_list' %}" class="nav-link {% block nav_clients %}{% endblock %}"><i class="fas fa-users"></i> Clients</a>
     <a href="{% url 'guides_list' %}" class="nav-link {% block nav_guides %}{% endblock %}"><i class="fas fa-user-tie"></i> Guides</a>
+    {% if can_manage_users %}
+    <a href="{% url 'users_list' %}" class="nav-link {% block nav_users %}{% endblock %}"><i class="fas fa-user-shield"></i> Users</a>
+    {% endif %}
 
-    {% if request.user.is_staff %}
+    {% if can_manage_data %}
     <div class="nav-section-label">Administration</div>
     <a href="{% url 'admin_control_dashboard' %}" class="nav-link {% block nav_admin_control %}{% endblock %}"><i class="fas fa-shield-halved"></i> Admin Control</a>
     {% endif %}
@@ -58,13 +61,35 @@
       </div>
     </div>
     <div class="topbar-actions">
+      <a href="{% url 'notifications_list' %}" class="btn btn-ghost btn-icon notification-btn" aria-label="Notifications" title="Notifications">
+        <i class="fas fa-bell"></i>
+        {% if unread_notifications_count %}
+        <span class="notification-pill">{{ unread_notifications_count }}</span>
+        {% endif %}
+      </a>
       <button class="btn btn-ghost btn-icon" id="theme-toggle" type="button" aria-label="Toggle dark mode" title="Toggle dark mode">
         <i class="fas fa-moon"></i>
       </button>
+      {% if request.user.is_authenticated %}
+      <a href="{% url 'user_profile' request.user.pk %}" class="user-chip" style="text-decoration:none;">
+        <i class="fas fa-user"></i> {{ request.user.username }} ({{ user_role|title }})
+      </a>
+      <form action="{% url 'logout' %}" method="post">
+        {% csrf_token %}
+        <button class="btn btn-ghost" type="submit"><i class="fas fa-right-from-bracket"></i> Logout</button>
+      </form>
+      {% endif %}
       {% block topbar_actions %}{% endblock %}
     </div>
   </div>
   <div class="content">
+    {% if messages %}
+    <div class="flash-stack">
+      {% for message in messages %}
+      <div class="flash flash-{{ message.tags|default:'info' }}">{{ message }}</div>
+      {% endfor %}
+    </div>
+    {% endif %}
     {% block content %}{% endblock %}
   </div>
 </main>

@@ -4,8 +4,10 @@
 {% block page_title %}{{ client.full_name }}{% endblock %}
 {% block breadcrumb %}<a href="{% url 'clients_list' %}" style="color:var(--text2);text-decoration:none;">Clients</a> → Profile{% endblock %}
 {% block topbar_actions %}
+{% if can_manage_data %}
 <a href="{% url 'client_edit' client.pk %}" class="btn btn-ghost"><i class="fas fa-pen"></i> Edit</a>
 <a href="{% url 'booking_create' %}" class="btn btn-primary"><i class="fas fa-plus"></i> New Booking</a>
+{% endif %}
 {% endblock %}
 {% block content %}
 <div class="grid-2">

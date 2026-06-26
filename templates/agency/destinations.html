@@ -3,7 +3,7 @@
 {% block nav_destinations %}active{% endblock %}
 {% block page_title %}Destinations{% endblock %}
 {% block breadcrumb %}Manage travel destinations{% endblock %}
-{% block topbar_actions %}<a href="{% url 'destination_create' %}" class="btn btn-primary"><i class="fas fa-plus"></i> Add Destination</a>{% endblock %}
+{% block topbar_actions %}{% if can_manage_data %}<a href="{% url 'destination_create' %}" class="btn btn-primary"><i class="fas fa-plus"></i> Add Destination</a>{% endif %}{% endblock %}
 {% block content %}
 {% if destinations %}
 <div class="dest-grid">
@@ -21,16 +21,18 @@
       <div style="font-size:12px;color:var(--text2);line-height:1.5;margin-bottom:12px;">{{ d.description|truncatewords:16 }}</div>
       <div style="display:flex;justify-content:space-between;align-items:center;">
         <span style="font-size:12px;color:var(--text3);">{{ d.pkg_count }} package{{ d.pkg_count|pluralize }}</span>
+        {% if can_manage_data %}
         <div style="display:flex;gap:6px;">
           <a href="{% url 'destination_edit' d.pk %}" class="btn btn-ghost btn-sm"><i class="fas fa-pen"></i></a>
           <a href="{% url 'destination_delete' d.pk %}" class="btn btn-danger btn-sm" onclick="return confirm('Delete destination?')"><i class="fas fa-trash"></i></a>
         </div>
+        {% endif %}
       </div>
     </div>
   </div>
   {% endfor %}
 </div>
 {% else %}
-<div class="card"><div class="empty-state"><i class="fas fa-map-marker-alt"></i><p>No destinations yet. <a href="{% url 'destination_create' %}" style="color:var(--accent);">Add one</a></p></div></div>
+<div class="card"><div class="empty-state"><i class="fas fa-map-marker-alt"></i><p>No destinations yet.{% if can_manage_data %} <a href="{% url 'destination_create' %}" style="color:var(--accent);">Add one</a>{% endif %}</p></div></div>
 {% endif %}
 {% endblock %}

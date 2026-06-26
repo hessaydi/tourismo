@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Destination, Package, Client, Booking, Guide
+from .models import Destination, Package, Client, Booking, Guide, Notification
 
 
 @admin.register(Destination)
@@ -62,3 +62,10 @@ class GuideAdmin(admin.ModelAdmin):
     list_display = ("name", "email", "languages", "rating", "is_available")
     list_filter = ("is_available",)
     search_fields = ("name", "email", "languages", "specialties")
+
+
+@admin.register(Notification)
+class NotificationAdmin(admin.ModelAdmin):
+    list_display = ("title", "user", "is_read", "created_at")
+    list_filter = ("is_read", "created_at")
+    search_fields = ("title", "message", "user__username")

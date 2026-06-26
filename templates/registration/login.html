@@ -1,0 +1,67 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - Tourismo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/app.css' %}">
+</head>
+<body class="auth-page">
+  <main class="auth-container">
+    <section class="card auth-card">
+      <h1 class="auth-title">Tourismo</h1>
+      <p class="auth-subtitle">Sign in to access the dashboard</p>
+
+      {% if recent_profiles %}
+      <div class="flash-stack" style="margin-bottom:16px;">
+        {% for profile in recent_profiles %}
+        <form method="post" action="{% url 'saved_profile_login' %}">
+          {% csrf_token %}
+          {% if next %}
+          <input type="hidden" name="next" value="{{ next }}">
+          {% endif %}
+          <input type="hidden" name="token" value="{{ profile.token }}">
+          <div style="display:flex;gap:8px;">
+            <button type="submit" class="btn btn-ghost" style="justify-content:flex-start;flex:1;">
+              <i class="fas fa-user"></i> Continue as {{ profile.display_name }} (@{{ profile.username }})
+            </button>
+            <a href="{% url 'login' %}?username={{ profile.username }}" class="btn btn-ghost" title="Use password">
+              <i class="fas fa-key"></i>
+            </a>
+          </div>
+        </form>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      {% if form.errors %}
+      <div class="flash flash-error">Invalid credentials. Please try again.</div>
+      {% endif %}
+
+      <form method="post" class="form-grid" style="grid-template-columns:1fr;">
+        {% csrf_token %}
+        {% if next %}
+        <input type="hidden" name="next" value="{{ next }}">
+        {% endif %}
+        <div class="form-group">
+          <label for="id_username">Username</label>
+          <input id="id_username" name="username" type="text" value="{{ form.username.value|default:prefill_username|default:'' }}" required>
+        </div>
+        <div class="form-group">
+          <label for="id_password">Password</label>
+          <input id="id_password" name="password" type="password" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Login</button>
+      </form>
+      <p class="auth-subtitle" style="margin-top: 14px; margin-bottom: 0;">
+        No account yet? <a href="{% url 'register' %}">Create one</a>
+      </p>
+    </section>
+  </main>
+  <script src="{% static 'js/app.js' %}"></script>
+</body>
+</html>

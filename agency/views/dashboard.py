@@ -1,31 +1,21 @@
 import json
 from datetime import date
 
-from django.contrib.admin.views.decorators import staff_member_required
-from django.db.models import Count, Sum, Q
-from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib import messages
+from django.db.models import Count, Q, Sum
+from django.shortcuts import get_object_or_404, redirect, render
 
-from .models import Destination, Package, Client, Booking, Guide
-
-
-def _first_day_of_month(value: date) -> date:
-    return value.replace(day=1)
-
-
-def _shift_month(value: date, months_back: int) -> date:
-    year = value.year
-    month = value.month - months_back
-    while month <= 0:
-        year -= 1
-        month += 12
-    return date(year, month, 1)
+from ..models import Booking, Client, Destination, Guide, Notification, Package
+from .shared import (
+    _create_notification,
+    _first_day_of_month,
+    _shift_month,
+    _to_bool,
+    require_data_management,
+)
 
 
-def _to_bool(post_data, key: str) -> bool:
-    return bool(post_data.get(key))
-
-
-@staff_member_required
+@require_data_management
 def admin_control_dashboard(request):
     today = date.today()
     paid_revenue = (
@@ -67,17 +57,14 @@ def dashboard(request):
     clients = Client.objects.count()
     packages = Package.objects.filter(status="active").count()
     pending = Booking.objects.filter(status="pending").count()
-    upcoming = Booking.objects.filter(
-        travel_date__gte=today, status="confirmed"
-    ).count()
+    upcoming = Booking.objects.filter(travel_date__gte=today, status="confirmed").count()
     recent_bookings = Booking.objects.select_related("client", "package").order_by(
         "-created_at"
     )[:8]
-    top_packages = Package.objects.annotate(b_count=Count("bookings")).order_by(
-        "-b_count"
-    )[:5]
+    top_packages = Package.objects.annotate(b_count=Count("bookings")).order_by("-b_count")[
+        :5
+    ]
 
-    # Monthly revenue for chart (last 6 complete/current months)
     monthly_data = []
     for i in range(5, -1, -1):
         month_start = _shift_month(_first_day_of_month(today), i)
@@ -89,9 +76,7 @@ def dashboard(request):
             ).aggregate(Sum("total_price"))["total_price__sum"]
             or 0
         )
-        monthly_data.append(
-            {"month": month_start.strftime("%b"), "revenue": float(rev)}
-        )
+        monthly_data.append({"month": month_start.strftime("%b"), "revenue": float(rev)})
 
     context = {
         "total_bookings": total_bookings,
@@ -108,7 +93,6 @@ def dashboard(request):
     return render(request, "agency/dashboard.html", context)
 
 
-# ── PACKAGES ─────────────────────────────────────────────────────────────────
 def packages_list(request):
     q = request.GET.get("q", "")
     cat = request.GET.get("category", "")
@@ -135,6 +119,7 @@ def packages_list(request):
     )
 
 
+@require_data_management
 def package_create(request):
     if request.method == "POST":
         package = Package(
@@ -150,6 +135,13 @@ def package_create(request):
             image_url=request.POST.get("image_url", ""),
         )
         package.save()
+        _create_notification(
+            request,
+            "Package created",
+            f"{package.title} was added to catalog.",
+            link="/packages/",
+        )
+        messages.success(request, "Package created successfully.")
         return redirect("packages_list")
     return render(
         request,
@@ -162,6 +154,7 @@ def package_create(request):
     )
 
 
+@require_data_management
 def package_edit(request, pk):
     package = get_object_or_404(Package, pk=pk)
     if request.method == "POST":
@@ -176,6 +169,13 @@ def package_edit(request, pk):
         package.includes = request.POST.get("includes", "")
         package.image_url = request.POST.get("image_url", "")
         package.save()
+        _create_notification(
+            request,
+            "Package updated",
+            f"{package.title} details were updated.",
+            link="/packages/",
+        )
+        messages.success(request, "Package updated successfully.")
         return redirect("packages_list")
     return render(
         request,
@@ -189,24 +189,32 @@ def package_edit(request, pk):
     )
 
 
-def package_delete(_request, pk):
-    get_object_or_404(Package, pk=pk).delete()
+@require_data_management
+def package_delete(request, pk):
+    package = get_object_or_404(Package, pk=pk)
+    package_title = package.title
+    package.delete()
+    _create_notification(
+        request,
+        "Package deleted",
+        f"{package_title} was removed from catalog.",
+        link="/packages/",
+    )
+    messages.success(request, "Package deleted successfully.")
     return redirect("packages_list")
 
 
-# ── CLIENTS ───────────────────────────────────────────────────────────────────
 def clients_list(request):
     q = request.GET.get("q", "")
     clients = Client.objects.annotate(b_count=Count("bookings")).order_by("-created_at")
     if q:
         clients = clients.filter(
-            Q(first_name__icontains=q)
-            | Q(last_name__icontains=q)
-            | Q(email__icontains=q)
+            Q(first_name__icontains=q) | Q(last_name__icontains=q) | Q(email__icontains=q)
         )
     return render(request, "agency/clients.html", {"clients": clients, "q": q})
 
 
+@require_data_management
 def client_create(request):
     if request.method == "POST":
         client = Client(
@@ -222,10 +230,18 @@ def client_create(request):
         if request.POST.get("date_of_birth"):
             client.date_of_birth = request.POST["date_of_birth"]
         client.save()
+        _create_notification(
+            request,
+            "Client added",
+            f"{client.full_name} profile was created.",
+            link="/clients/",
+        )
+        messages.success(request, "Client created successfully.")
         return redirect("clients_list")
     return render(request, "agency/client_form.html", {})
 
 
+@require_data_management
 def client_edit(request, pk):
     client = get_object_or_404(Client, pk=pk)
     if request.method == "POST":
@@ -240,30 +256,39 @@ def client_edit(request, pk):
         if request.POST.get("date_of_birth"):
             client.date_of_birth = request.POST["date_of_birth"]
         client.save()
+        _create_notification(
+            request,
+            "Client updated",
+            f"{client.full_name} profile was updated.",
+            link="/clients/",
+        )
+        messages.success(request, "Client updated successfully.")
         return redirect("clients_list")
     return render(request, "agency/client_form.html", {"client": client})
 
 
-def client_delete(_request, pk):
-    get_object_or_404(Client, pk=pk).delete()
+@require_data_management
+def client_delete(request, pk):
+    client = get_object_or_404(Client, pk=pk)
+    client_name = client.full_name
+    client.delete()
+    _create_notification(
+        request, "Client deleted", f"{client_name} was deleted.", link="/clients/"
+    )
+    messages.success(request, "Client deleted successfully.")
     return redirect("clients_list")
 
 
 def client_detail(request, pk):
     client = get_object_or_404(Client, pk=pk)
     bookings = client.bookings.select_related("package").order_by("-created_at")
-    return render(
-        request, "agency/client_detail.html", {"client": client, "bookings": bookings}
-    )
+    return render(request, "agency/client_detail.html", {"client": client, "bookings": bookings})
 
 
-# ── BOOKINGS ──────────────────────────────────────────────────────────────────
 def bookings_list(request):
     q = request.GET.get("q", "")
     status = request.GET.get("status", "")
-    bookings = Booking.objects.select_related("client", "package").order_by(
-        "-created_at"
-    )
+    bookings = Booking.objects.select_related("client", "package").order_by("-created_at")
     if q:
         bookings = bookings.filter(
             Q(booking_ref__icontains=q)
@@ -284,6 +309,7 @@ def bookings_list(request):
     )
 
 
+@require_data_management
 def booking_create(request):
     if request.method == "POST":
         package = get_object_or_404(Package, pk=request.POST["package"])
@@ -300,6 +326,13 @@ def booking_create(request):
             special_requests=request.POST.get("special_requests", ""),
         )
         booking.save()
+        _create_notification(
+            request,
+            "Booking created",
+            f"{booking.booking_ref} was created for {booking.client.full_name}.",
+            link="/bookings/",
+        )
+        messages.success(request, "Booking created successfully.")
         return redirect("bookings_list")
     return render(
         request,
@@ -313,6 +346,7 @@ def booking_create(request):
     )
 
 
+@require_data_management
 def booking_edit(request, pk):
     booking = get_object_or_404(Booking, pk=pk)
     if request.method == "POST":
@@ -326,6 +360,13 @@ def booking_edit(request, pk):
         booking.payment_status = request.POST.get("payment_status", "unpaid")
         booking.special_requests = request.POST.get("special_requests", "")
         booking.save()
+        _create_notification(
+            request,
+            "Booking updated",
+            f"{booking.booking_ref} was updated.",
+            link="/bookings/",
+        )
+        messages.success(request, "Booking updated successfully.")
         return redirect("bookings_list")
     return render(
         request,
@@ -340,12 +381,16 @@ def booking_edit(request, pk):
     )
 
 
-def booking_delete(_request, pk):
-    get_object_or_404(Booking, pk=pk).delete()
+@require_data_management
+def booking_delete(request, pk):
+    booking = get_object_or_404(Booking, pk=pk)
+    booking_ref = booking.booking_ref
+    booking.delete()
+    _create_notification(request, "Booking deleted", f"{booking_ref} was deleted.", link="/bookings/")
+    messages.success(request, "Booking deleted successfully.")
     return redirect("bookings_list")
 
 
-# ── DESTINATIONS ─────────────────────────────────────────────────────────────
 def destinations_list(request):
     destinations = Destination.objects.annotate(pkg_count=Count("packages")).order_by(
         "-created_at"
@@ -353,6 +398,7 @@ def destinations_list(request):
     return render(request, "agency/destinations.html", {"destinations": destinations})
 
 
+@require_data_management
 def destination_create(request):
     if request.method == "POST":
         destination = Destination(
@@ -363,10 +409,18 @@ def destination_create(request):
             is_featured=_to_bool(request.POST, "is_featured"),
         )
         destination.save()
+        _create_notification(
+            request,
+            "Destination created",
+            f"{destination.name}, {destination.country} was added.",
+            link="/destinations/",
+        )
+        messages.success(request, "Destination created successfully.")
         return redirect("destinations_list")
     return render(request, "agency/destination_form.html", {})
 
 
+@require_data_management
 def destination_edit(request, pk):
     destination = get_object_or_404(Destination, pk=pk)
     if request.method == "POST":
@@ -376,21 +430,38 @@ def destination_edit(request, pk):
         destination.image_url = request.POST.get("image_url", "")
         destination.is_featured = _to_bool(request.POST, "is_featured")
         destination.save()
+        _create_notification(
+            request,
+            "Destination updated",
+            f"{destination.name}, {destination.country} was updated.",
+            link="/destinations/",
+        )
+        messages.success(request, "Destination updated successfully.")
         return redirect("destinations_list")
     return render(request, "agency/destination_form.html", {"destination": destination})
 
 
-def destination_delete(_request, pk):
-    get_object_or_404(Destination, pk=pk).delete()
+@require_data_management
+def destination_delete(request, pk):
+    destination = get_object_or_404(Destination, pk=pk)
+    destination_name = str(destination)
+    destination.delete()
+    _create_notification(
+        request,
+        "Destination deleted",
+        f"{destination_name} was removed.",
+        link="/destinations/",
+    )
+    messages.success(request, "Destination deleted successfully.")
     return redirect("destinations_list")
 
 
-# ── GUIDES ────────────────────────────────────────────────────────────────────
 def guides_list(request):
     guides = Guide.objects.all().order_by("-created_at")
     return render(request, "agency/guides.html", {"guides": guides})
 
 
+@require_data_management
 def guide_create(request):
     if request.method == "POST":
         guide = Guide(
@@ -404,10 +475,18 @@ def guide_create(request):
             is_available=_to_bool(request.POST, "is_available"),
         )
         guide.save()
+        _create_notification(
+            request,
+            "Guide created",
+            f"{guide.name} profile was created.",
+            link="/guides/",
+        )
+        messages.success(request, "Guide created successfully.")
         return redirect("guides_list")
     return render(request, "agency/guide_form.html", {})
 
 
+@require_data_management
 def guide_edit(request, pk):
     guide = get_object_or_404(Guide, pk=pk)
     if request.method == "POST":
@@ -420,10 +499,39 @@ def guide_edit(request, pk):
         guide.rating = request.POST.get("rating", 5.0)
         guide.is_available = _to_bool(request.POST, "is_available")
         guide.save()
+        _create_notification(
+            request,
+            "Guide updated",
+            f"{guide.name} profile was updated.",
+            link="/guides/",
+        )
+        messages.success(request, "Guide updated successfully.")
         return redirect("guides_list")
     return render(request, "agency/guide_form.html", {"guide": guide})
 
 
-def guide_delete(_request, pk):
-    get_object_or_404(Guide, pk=pk).delete()
+@require_data_management
+def guide_delete(request, pk):
+    guide = get_object_or_404(Guide, pk=pk)
+    guide_name = guide.name
+    guide.delete()
+    _create_notification(request, "Guide deleted", f"{guide_name} was removed.", link="/guides/")
+    messages.success(request, "Guide deleted successfully.")
     return redirect("guides_list")
+
+
+def notifications_list(request):
+    notifications = request.user.notifications.all()
+    return render(request, "agency/notifications.html", {"notifications": notifications})
+
+
+def notification_mark_read(request, pk):
+    notification = get_object_or_404(Notification, pk=pk, user=request.user)
+    if not notification.is_read:
+        notification.is_read = True
+        notification.save(update_fields=["is_read"])
+
+    next_url = request.GET.get("next")
+    if next_url:
+        return redirect(next_url)
+    return redirect("notifications_list")
