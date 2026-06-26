@@ -27,7 +27,6 @@ local_settings.py
 
 # uv
 .python-version
-uv.lock
 
 # Tools
 .ruff_cache/
