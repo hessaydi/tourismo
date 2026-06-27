@@ -100,14 +100,14 @@ jobs:
       - name: Set up kubectl
         uses: azure/setup-kubectl@v4
 
-      # - name: Configure kubeconfig
-      #   run: |
-      #     mkdir -p ~/.kube
-      #     echo "${{ secrets.KUBECONFIG }}" | base64 -d > ~/.kube/config
-      #     chmod 600 ~/.kube/config
+      - name: Configure kubeconfig
+        run: |
+          mkdir -p ~/.kube
+          echo "${{ secrets.KUBECONFIG }}" | base64 -d > ~/.kube/config
+          chmod 600 ~/.kube/config
 
-      # - name: Update image and deploy
-      #   run: |
-      #     IMAGE="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:$(echo ${{ github.sha }} | cut -c1-7)"
-      #     kubectl set image deployment/django django="$IMAGE" -n tourismo
-      #     kubectl rollout status deployment/django -n tourismo --timeout=5m
+      - name: Update image and deploy
+        run: |
+          IMAGE="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:$(echo ${{ github.sha }} | cut -c1-7)"
+          kubectl set image deployment/django django="$IMAGE" -n tourismo
+          kubectl rollout status deployment/django -n tourismo --timeout=5m
