@@ -33,6 +33,17 @@ jobs:
       - name: Lint with ruff
         run: uv run ruff check .
 
+      - name: Run Trivy filesystem scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: fs
+          scan-ref: .
+          vuln-type: os,library
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          format: table
+          exit-code: '1'
+
       - name: Run tests with coverage
         env:
           DJANGO_SECRET_KEY: ci-secret-key
