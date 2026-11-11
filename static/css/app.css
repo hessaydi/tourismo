@@ -1,23 +1,23 @@
 :root {
-	--bg: #f4f8fb;
+	--bg: #f6f9fc;
 	--bg2: #ffffff;
-	--bg3: #e9f0f5;
-	--border: #0f2f4a1a;
-	--border2: #0f2f4a2c;
-	--accent: #ea6f3e;
-	--accent2: #f2b15a;
-	--teal: #109f9a;
-	--blue: #3f7de3;
-	--purple: #7b64d8;
-	--red: #d75058;
-	--green: #239769;
-	--text: #112433;
-	--text2: #2f4a5d;
-	--text3: #6f8697;
+	--bg3: #f1f5fb;
+	--border: #1f3b5a1a;
+	--border2: #1f3b5a30;
+	--accent: #2f6feb;
+	--accent2: #4e8dff;
+	--teal: #0ea5a5;
+	--blue: #2f6feb;
+	--purple: #7c5cff;
+	--red: #dc4f5f;
+	--green: #1f9a63;
+	--text: #10253a;
+	--text2: #36506a;
+	--text3: #6e859c;
 	--sidebar-w: 260px;
 	--radius: 14px;
 	--radius-sm: 8px;
-	--shadow-sm: 0 6px 20px #0f2f4a12;
+	--shadow-sm: 0 8px 24px #16324f12;
 }
 
 [data-theme="dark"] {
@@ -26,10 +26,10 @@
 	--bg3: #142a3b;
 	--border: #ffffff12;
 	--border2: #ffffff2a;
-	--accent: #ef8758;
-	--accent2: #f2bf77;
+	--accent: #6ea2ff;
+	--accent2: #8cb8ff;
 	--teal: #3fc8bf;
-	--blue: #6d9ef4;
+	--blue: #8cb8ff;
 	--purple: #9a84f0;
 	--red: #e7746d;
 	--green: #59c692;
@@ -52,8 +52,8 @@ html {
 body {
 	font-family: "Manrope", sans-serif;
 	background:
-		radial-gradient(circle at 8% -10%, #f2b15a2e, transparent 30%),
-		radial-gradient(circle at 100% 0%, #109f9a20, transparent 35%),
+		radial-gradient(circle at 8% -10%, #4e8dff24, transparent 30%),
+		radial-gradient(circle at 100% 0%, #2f6feb14, transparent 35%),
 		var(--bg);
 	color: var(--text);
 	min-height: 100vh;
@@ -152,9 +152,9 @@ body {
 }
 
 .nav-link.active {
-	background: linear-gradient(135deg, #ea6f3e20, #f2b15a14);
+	background: linear-gradient(135deg, #2f6feb1f, #4e8dff14);
 	color: var(--accent);
-	border: 1px solid #ea6f3e35;
+	border: 1px solid #2f6feb3d;
 }
 
 .nav-link i {
@@ -196,6 +196,7 @@ body {
 	display: flex;
 	align-items: center;
 	gap: 12px;
+	min-width: 0;
 }
 
 .topbar-title {
@@ -203,18 +204,34 @@ body {
 	font-size: 20px;
 	font-weight: 700;
 	color: var(--text);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
 }
 
 .topbar-breadcrumb {
 	font-size: 12px;
 	color: var(--text3);
 	margin-top: 2px;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
 }
 
 .topbar-actions {
 	display: flex;
 	gap: 10px;
 	align-items: center;
+	justify-content: flex-end;
+	flex-wrap: wrap;
+}
+
+.topbar-actions form {
+	margin: 0;
+}
+
+.topbar-actions .btn {
+	white-space: nowrap;
 }
 
 .mobile-menu-btn {
@@ -244,7 +261,7 @@ body {
 .btn-primary:hover {
 	opacity: 0.95;
 	transform: translateY(-1px);
-	box-shadow: 0 4px 20px #ea6f3e42;
+	box-shadow: 0 6px 22px #2f6feb3b;
 }
 
 .btn-ghost {
@@ -549,7 +566,7 @@ input:focus,
 select:focus,
 textarea:focus {
 	border-color: var(--accent);
-	box-shadow: 0 0 0 3px #ea6f3e1a;
+	box-shadow: 0 0 0 3px #2f6feb24;
 }
 
 textarea {
@@ -833,10 +850,21 @@ a {
 	.topbar {
 		padding: 14px 16px;
 		gap: 12px;
+		align-items: flex-start;
+		flex-wrap: wrap;
 	}
 
 	.topbar-actions {
 		gap: 8px;
+		justify-content: flex-start;
+		width: 100%;
+		overflow-x: auto;
+		padding-bottom: 2px;
+		scrollbar-width: thin;
+	}
+
+	.topbar-breadcrumb {
+		display: none;
 	}
 }
 
@@ -869,6 +897,10 @@ a {
 	font-size: 12px;
 	color: var(--text2);
 	background: var(--bg3);
+	white-space: nowrap;
+	max-width: 240px;
+	overflow: hidden;
+	text-overflow: ellipsis;
 }
 
 .flash-stack {

@@ -48,11 +48,9 @@ class Package(models.Model):
 
     @property
     def bookings(self) -> int:
-        return (
-            self.bookings_rows
-            .filter(status__in=["confirmed", "pending"])
-            .count()
-        )
+        return Booking.objects.filter(
+            packages=self, status__in=["confirmed", "pending"]
+        ).count()
 
 
 class Client(models.Model):

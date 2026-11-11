@@ -1,0 +1,24 @@
+# CODEOWNERS for Tourismo
+# Replace the placeholders below with your real GitHub usernames or teams.
+# Examples:
+#   @your-org/backend-team
+#   @your-org/devops-team
+#   @your-username
+
+# Global fallback owners for all files
+* @your-org/backend-team
+
+# CI/CD and infra
+.github/workflows/ @your-org/devops-team @your-org/backend-team
+Dockerfile @your-org/devops-team
+docker-compose.yml @your-org/devops-team
+k8s/ @your-org/devops-team
+
+# Django app and templates
+agency/ @your-org/backend-team
+tourismo/ @your-org/backend-team
+templates/ @your-org/backend-team
+static/ @your-org/backend-team
+
+# Tests and BDD features
+features/ @your-org/qa-team @your-org/backend-team
